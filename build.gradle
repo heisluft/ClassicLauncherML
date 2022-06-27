@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
   compileClasspath 'org.jetbrains:annotations:23.0.0'
+  implementation "org.fusesource.jansi:jansi:2.4.0"
   implementation 'cpw.mods:modlauncher:10.0.1'
   implementation 'cpw.mods:bootstraplauncher:1.1.0'
   implementation 'cpw.mods:securejarhandler:2.0.3'

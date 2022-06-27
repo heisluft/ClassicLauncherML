@@ -9,6 +9,7 @@ module de.heisluft.classiclauncher {
   requires org.apache.logging.log4j;
   requires cpw.mods.securejarhandler;
   requires static org.jetbrains.annotations;
+  requires java.logging;
   provides ILaunchHandlerService with LaunchHandlerService;
   provides ITransformationService with TransformationService;
 }
