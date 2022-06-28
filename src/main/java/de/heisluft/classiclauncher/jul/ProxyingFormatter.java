@@ -1,4 +1,4 @@
-package de.heisluft.classiclauncher;
+package de.heisluft.classiclauncher.jul;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

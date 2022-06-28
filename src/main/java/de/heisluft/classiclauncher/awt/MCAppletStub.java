@@ -1,14 +1,19 @@
 package de.heisluft.classiclauncher.awt;
 
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
 import java.applet.AppletContext;
 import java.applet.AppletStub;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static de.heisluft.classiclauncher.LaunchHandlerService.*;
+
 public class MCAppletStub implements AppletStub {
 
   private static final long serialVersionUID = 1L;
-
+  private static final Marker MARKER = MarkerManager.getMarker("APPLET");
 
   public void appletResize(int width, int height) {}
 
@@ -20,7 +25,7 @@ public class MCAppletStub implements AppletStub {
   @Override
   public URL getDocumentBase() {
     try {
-      return new URL("http://minecraft.net/");
+      return new URL("http://localhost/");
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
@@ -30,7 +35,7 @@ public class MCAppletStub implements AppletStub {
   @Override
   public URL getCodeBase() {
     try {
-      return new URL("http://minecraft.net/");
+      return new URL("http://localhost/");
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
@@ -39,11 +44,8 @@ public class MCAppletStub implements AppletStub {
 
   @Override
   public String getParameter(String paramName) {
-    if(paramName.equals("username")) return "User1234";
-    if(paramName.equals("sessionid")) return "1234";
-    if(paramName.equals("haspaid")) return "true";
-    if(paramName.equals("fullscreen"))return "false";
-    System.out.println("Client asked for non-existent parameter: " + paramName);
+    if(APPLET_PARAMS.containsKey(paramName)) return APPLET_PARAMS.get(paramName);
+    LOGGER.warn(MARKER, "Client asked for non-existent parameter: " + paramName);
     return null;
   }
 

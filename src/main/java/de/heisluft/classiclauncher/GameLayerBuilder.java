@@ -14,19 +14,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.module.ModuleDescriptor;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class TransformationService implements ITransformationService {
+public class GameLayerBuilder implements ITransformationService {
 
   private static final Logger LOGGER = LogManager.getLogger("ClassicLauncher");
   private static final Marker MARKER = MarkerManager.getMarker("TRANSFORMATION_SERVICE");
 
   @Override
   public @NotNull String name() {
-    return "test";
+    return "classic-modularizer";
   }
 
   @Override
@@ -34,7 +37,6 @@ public class TransformationService implements ITransformationService {
 
   @Override
   public void onLoad(IEnvironment env, Set<String> otherServices) {
-    // TODO: Check why this is not working
     try(InputStream is = getClass().getClassLoader().getResourceAsStream("logging.properties")) {
       java.util.logging.LogManager.getLogManager().readConfiguration(is);
     } catch(IOException e) {
@@ -84,6 +86,11 @@ public class TransformationService implements ITransformationService {
     Path mcPath = Path.of("build/classes/java/main/");
     jars.add(SecureJar.from(jar -> new MCJarMetadata(getPkgs(mcPath)), mcPath));
     return List.of(new Resource(IModuleLayerManager.Layer.GAME, jars));
+  }
+
+  @Override
+  public Map.Entry<Set<String>, Supplier<Function<String, Optional<URL>>>> additionalResourcesLocator() {
+    return ITransformationService.super.additionalResourcesLocator();
   }
 
   @Override
