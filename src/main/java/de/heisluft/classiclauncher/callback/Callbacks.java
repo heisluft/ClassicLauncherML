@@ -1,5 +1,8 @@
 package de.heisluft.classiclauncher.callback;
 
+import de.heisluft.classiclauncher.LaunchHandlerService;
+
+import java.io.File;
 import java.io.InputStream;
 
 public class Callbacks {
@@ -18,5 +21,13 @@ public class Callbacks {
     if(v1 && !v2) return -1;
     if(v2 && !v1) return 1;
     return Float.compare(dist1, dist2);
+  }
+
+  public static File assetsDir() {
+    return LaunchHandlerService.assetsDir.toFile();
+  }
+
+  public static File gameDir() {
+    return LaunchHandlerService.gameDir.toFile();
   }
 }

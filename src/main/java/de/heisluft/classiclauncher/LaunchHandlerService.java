@@ -34,8 +34,6 @@ public class LaunchHandlerService implements ILaunchHandlerService {
   private static final Marker MARKER = MarkerManager.getMarker("SERVICE");
   public static Path gameDir, assetsDir;
 
-  public static final Map<String, ?> PROP_MAP = Map.of("create", "true");
-
   @Override
   public String name() {
     return "classiclauncher";
@@ -58,7 +56,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
     assetsDir = os.valueOf(assetsDirOption);
     if(assetsDir == null) assetsDir = gameDir.resolve("resources");
     return () -> {
-      Path libsDir = Path.of("libs");
+      Path libsDir = gameDir.resolve("libs");
       LOGGER.info(MARKER, "Extracting libraries to " + libsDir.toAbsolutePath());
       if(!Files.isDirectory(libsDir)) Files.createDirectories(libsDir);
       List<Path> children = Files.walk(libsDir).filter(Predicate.not(libsDir::equals)).toList();

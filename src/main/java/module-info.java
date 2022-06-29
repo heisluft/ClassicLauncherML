@@ -15,6 +15,7 @@ module de.heisluft.classiclauncher {
   requires java.logging;
   requires org.objectweb.asm.tree;
   requires jopt.simple;
+  requires json.simple;
   provides ILaunchHandlerService with LaunchHandlerService;
   provides ITransformationService with GameLayerBuilder;
   provides ILaunchPluginService with CoreModManager;
