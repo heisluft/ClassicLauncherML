@@ -48,7 +48,7 @@ public class GameLayerBuilder implements ITransformationService {
     try {
       return Files.walk(p).filter(Files::isDirectory).filter(d -> {
         try {
-          return !p.equals(d) && Files.walk(d, 1).anyMatch(Files::isRegularFile);
+          return !p.equals(d) && Files.walk(d, 1).filter(Files::isRegularFile).anyMatch(f -> f.toString().endsWith(".class"));
         } catch(IOException e) {
           throw new UncheckedIOException(e);
         }}).map(p::relativize).map(Path::toString).map(s -> s.replace(p.getFileSystem().getSeparator(), ".")).collect(Collectors.toSet());
@@ -80,17 +80,21 @@ public class GameLayerBuilder implements ITransformationService {
     List<SecureJar> jars = new ArrayList<>();
     for (String path : System.getProperty("legacyClassPath", "").split(File.pathSeparator)) {
       String fname = path.substring(path.lastIndexOf(File.separatorChar) + 1);
-      if(fname.equals("main") || Arrays.stream(ignores).anyMatch(fname::startsWith)) continue;
-      jars.add(SecureJar.from(Path.of(path)));
+      if(Arrays.stream(ignores).anyMatch(fname::startsWith)) continue;
+      Path p = Path.of(path);
+      if(Files.isDirectory(p)) {
+        Set<String> pkgs = getPkgs(p);
+        // TODO: This could easily break as soon as a non MC dir is specified
+        //  (e.g. if classiclauncher was made a sourceSet instead of a subproject.) => Generate version and name? how?
+        if(!pkgs.isEmpty()) jars.add(SecureJar.from(jar -> new MCJarMetadata(pkgs), p));
+      } else jars.add(SecureJar.from(p));
     }
-    Path mcPath = Path.of("build/classes/java/main/");
-    jars.add(SecureJar.from(jar -> new MCJarMetadata(getPkgs(mcPath)), mcPath));
     return List.of(new Resource(IModuleLayerManager.Layer.GAME, jars));
   }
 
   @Override
   public Map.Entry<Set<String>, Supplier<Function<String, Optional<URL>>>> additionalResourcesLocator() {
-    return ITransformationService.super.additionalResourcesLocator();
+    return null;
   }
 
   @Override
