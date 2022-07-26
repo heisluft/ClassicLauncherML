@@ -22,7 +22,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class GameLayerBuilder implements ITransformationService {
+public class UnzippedMCModuleBuilder implements ITransformationService {
 
   private static final Logger LOGGER = LogManager.getLogger("ClassicLauncher");
   private static final Marker MARKER = MarkerManager.getMarker("TRANSFORMATION_SERVICE");
