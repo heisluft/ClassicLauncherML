@@ -1,0 +1,11 @@
+pluginManagement {
+  repositories {
+    maven {
+      url 'https://heisluft.de/maven/'
+    }
+    maven {
+      url 'https://maven.minecraftforge.net/'
+    }
+  }
+}
+rootProject.name = 'classiclauncherml'
