@@ -2,16 +2,15 @@ package de.heisluft.classiclauncher.coremods;
 
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import de.heisluft.classiclauncher.LaunchHandlerService;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 public class AssetReflux implements CoreMod {
 
-  private static final Marker MARKER = MarkerManager.getMarker("ASSETREFLUX");
-  private static final String AR_CALLBACK_CLASSNAME = "de/heisluft/classiclauncher/callback/AssetRefluxCallback";
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
@@ -107,8 +106,7 @@ public class AssetReflux implements CoreMod {
               }
               // Skip all those other aloads
               AbstractInsnNode next = ain.getNext();
-              while(!(next instanceof MethodInsnNode)) next = next.getNext();
-              MethodInsnNode theCall = (MethodInsnNode) next;
+              while(!(next instanceof MethodInsnNode theCall)) next = next.getNext();
 
               //sanity check that the called method belongs to SoundManager
               if(!smClassName.equals(theCall.owner)) continue;
@@ -134,7 +132,7 @@ public class AssetReflux implements CoreMod {
           mn.instructions.add(new LdcInsnNode(soundManagerFieldName));
           mn.instructions.add(new LdcInsnNode(soundManagerAddSoundMethodName));
           mn.instructions.add(new LdcInsnNode(soundManagerAddMusicMethodName));
-          mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, AR_CALLBACK_CLASSNAME, "callback", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"));
+          mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, CALLBACK_CLASSNAME, "callback", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"));
           mn.instructions.add(new InsnNode(Opcodes.RETURN));
           mn.tryCatchBlocks.clear();
           mn.localVariables = null;

@@ -1,15 +1,14 @@
 package de.heisluft.classiclauncher.coremods;
 
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -19,7 +18,7 @@ import java.util.HashMap;
 
 public class ComparatorFixer implements CoreMod {
 
-  private static final Marker MARKER = MarkerManager.getMarker("COMPAREFIXER");
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
@@ -68,17 +67,17 @@ public class ComparatorFixer implements CoreMod {
       cmpNode.instructions.insert(new InsnNode(Opcodes.ICONST_0));
       cmpNode.instructions.insert(new InsnNode(Opcodes.ICONST_0));
     } else {
-      cmpNode.instructions.insert(chunkVisibleGet.clone(new HashMap<LabelNode, LabelNode>()));
+      cmpNode.instructions.insert(chunkVisibleGet.clone(new HashMap<>()));
       cmpNode.instructions.insert(new VarInsnNode(Opcodes.ALOAD, 4));
-      cmpNode.instructions.insert(chunkVisibleGet.clone(new HashMap<LabelNode, LabelNode>()));
+      cmpNode.instructions.insert(chunkVisibleGet.clone(new HashMap<>()));
       cmpNode.instructions.insert(new VarInsnNode(Opcodes.ALOAD, 3));
     }
-    cmpNode.instructions.insert(invokeInsn.clone(new HashMap<LabelNode, LabelNode>()));
-    cmpNode.instructions.insert(playerFieldGet.clone(new HashMap<LabelNode, LabelNode>()));
+    cmpNode.instructions.insert(invokeInsn.clone(new HashMap<>()));
+    cmpNode.instructions.insert(playerFieldGet.clone(new HashMap<>()));
     cmpNode.instructions.insert(new VarInsnNode(Opcodes.ALOAD, 0));
     cmpNode.instructions.insert(new VarInsnNode(Opcodes.ALOAD, 4));
-    cmpNode.instructions.insert(invokeInsn.clone(new HashMap<LabelNode, LabelNode>()));
-    cmpNode.instructions.insert(playerFieldGet.clone(new HashMap<LabelNode, LabelNode>()));
+    cmpNode.instructions.insert(invokeInsn.clone(new HashMap<>()));
+    cmpNode.instructions.insert(playerFieldGet.clone(new HashMap<>()));
     cmpNode.instructions.insert(new VarInsnNode(Opcodes.ALOAD, 0));
     cmpNode.instructions.insert(new VarInsnNode(Opcodes.ALOAD, 3));
     cmpNode.instructions.insert(new VarInsnNode(Opcodes.ASTORE, 4));

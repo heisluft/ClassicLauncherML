@@ -1,8 +1,7 @@
 package de.heisluft.classiclauncher.coremods;
-
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -11,12 +10,9 @@ import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 public class URLTransformer implements CoreMod {
 
-  private static final Marker MARKER = MarkerManager.getMarker("URLTRANSFORMER");
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
   public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
@@ -24,14 +20,12 @@ public class URLTransformer implements CoreMod {
     for(MethodNode mn : node.methods) {
       for(AbstractInsnNode ain : mn.instructions) {
         if(!(ain instanceof LdcInsnNode) && !(ain instanceof InvokeDynamicInsnNode)) continue;
-        if(ain instanceof InvokeDynamicInsnNode) {
-          InvokeDynamicInsnNode idin = (InvokeDynamicInsnNode) ain;
+        if(ain instanceof InvokeDynamicInsnNode idin) {
           Handle bsm = idin.bsm;
           if(!"java/lang/invoke/StringConcatFactory".equals(bsm.getOwner())) continue;
           if(!"makeConcatWithConstants".equals(bsm.getName())) continue;
           if(idin.bsmArgs.length > 1) continue;
-          if(!(idin.bsmArgs[0] instanceof String)) continue;
-          String recipe = (String) idin.bsmArgs[0];
+          if(!(idin.bsmArgs[0] instanceof String recipe)) continue;
           if(!recipe.startsWith("http://")) continue;
           String[] split = recipe.split("\u0001", -1);
 
