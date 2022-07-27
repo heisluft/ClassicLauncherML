@@ -20,6 +20,7 @@ import de.heisluft.classiclauncher.awt.MCAppletStub;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.util.PathConverter;
+import joptsimple.util.PathProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -44,17 +45,17 @@ public class LaunchHandlerService implements ILaunchHandlerService {
 
   @Override
   public ServiceRunner launchService(String[] arguments, ModuleLayer gameLayer) {
-    OptionParser optionParser = new OptionParser();
-    optionParser.accepts("version").withRequiredArg();
-    OptionSpec<Path> gameDirOption = optionParser.accepts("gameDir").withRequiredArg().withValuesConvertedBy(new PathConverter()).defaultsTo(Path.of("."));
-    OptionSpec<Path> assetsDirOption = optionParser.accepts("assetsDir").withRequiredArg().withValuesConvertedBy(new PathConverter());
-    OptionSet os = optionParser.parse(arguments);
-
-    List<?> s = os.nonOptionArguments();
+    OptionParser parser = new OptionParser();
+    OptionSpec<String> versionSpec = parser.accepts("version").withRequiredArg().defaultsTo("N/A");
+    OptionSpec<Path> gameDirSpec = parser.accepts("gameDir").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Path.of("."));
+    OptionSpec<Path> assetsDirSpec = parser.accepts("assetsDir").withRequiredArg().withValuesConvertedBy(new PathConverter());
+    OptionSet optionSet = parser.parse(arguments);
+    String gameVersion = optionSet.valueOf(versionSpec);
+    gameDir = optionSet.valueOf(gameDirSpec);
+    assetsDir = optionSet.has(assetsDirSpec) ? optionSet.valueOf(assetsDirSpec) : gameDir.resolve("resources");
+    List<?> s = optionSet.nonOptionArguments();
     for(int i = 0; i < s.size() / 2; i++) APPLET_PARAMS.put(s.get(i*2).toString(), s.get(i*2+1).toString());
-    gameDir = gameDirOption.value(os);
-    assetsDir = os.valueOf(assetsDirOption);
-    if(assetsDir == null) assetsDir = gameDir.resolve("resources");
+
     return () -> {
       Path libsDir = gameDir.resolve("libs");
       LOGGER.info(MARKER, "Extracting libraries to " + libsDir.toAbsolutePath());
@@ -72,13 +73,10 @@ public class LaunchHandlerService implements ILaunchHandlerService {
       System.setProperty("org.lwjgl.librarypath", libspath);
       System.setProperty("net.java.games.input.librarypath", libspath);
 
-      final Frame launcherFrameFake = new Frame();
-      launcherFrameFake.setTitle("Minecraft");
-      launcherFrameFake.setBackground(Color.BLACK);
-      launcherFrameFake.setSize(1280, 720);
-      launcherFrameFake.setResizable(false);
-
-      launcherFrameFake.addWindowListener(new WindowAdapter() {
+      Frame frame = new Frame("minecraft " + gameVersion);
+      frame.setSize(1280, 720);
+      frame.setResizable(false);
+      frame.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
           System.exit(1);
@@ -87,21 +85,18 @@ public class LaunchHandlerService implements ILaunchHandlerService {
 
       LOGGER.info(MARKER, "Starting minecraft");
       Module mcModule = gameLayer.findModule("minecraft").orElseThrow();
-      Class<?> clazz = Class.forName(mcModule, "net.minecraft.client.MinecraftApplet");
-      if(clazz == null) {
-        clazz = Class.forName(mcModule, "com.mojang.minecraft.MinecraftApplet");
+      Class<?> appletClass = Class.forName(mcModule, "net.minecraft.client.MinecraftApplet");
+      if(appletClass == null) {
+        appletClass = Class.forName(mcModule, "com.mojang.minecraft.MinecraftApplet");
       }
 
-      Applet applet = (Applet) clazz.getConstructor().newInstance();
-      applet.setPreferredSize(launcherFrameFake.getSize());
+      Applet applet = (Applet) appletClass.getConstructor().newInstance();
       applet.setStub(new MCAppletStub());
-      launcherFrameFake.add(applet);
-      launcherFrameFake.pack();
-      launcherFrameFake.validate();
+      applet.setPreferredSize(frame.getSize());
 
-
-      launcherFrameFake.setLocationRelativeTo(null);
-      launcherFrameFake.setVisible(true);
+      frame.add(applet);
+      frame.pack();
+      frame.setVisible(true);
 
       applet.init();
       applet.start();
