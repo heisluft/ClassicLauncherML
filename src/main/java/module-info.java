@@ -8,9 +8,9 @@ module de.heisluft.classiclauncher {
   requires static org.jetbrains.annotations;
   requires java.logging;
   requires org.apache.logging.log4j;
+  requires org.apache.logging.log4j.jul;
   requires org.objectweb.asm.tree;
   provides cpw.mods.modlauncher.api.ILaunchHandlerService with de.heisluft.classiclauncher.LaunchHandlerService;
   provides cpw.mods.modlauncher.api.ITransformationService with de.heisluft.classiclauncher.UnzippedMCModuleBuilder;
   provides cpw.mods.modlauncher.serviceapi.ILaunchPluginService with de.heisluft.classiclauncher.coremods.CoreModManager;
-  exports de.heisluft.classiclauncher.jul;
 }

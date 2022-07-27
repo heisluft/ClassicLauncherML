@@ -19,16 +19,18 @@ repositories {
   maven {
     url 'https://maven.minecraftforge.net/'
   }
+  mavenCentral()
 }
 
 dependencies {
-  compileClasspath 'org.jetbrains:annotations:23.0.0'
-  implementation "org.fusesource.jansi:jansi:2.4.0"
+  runtimeClasspath "org.fusesource.jansi:jansi:2.4.0"
   implementation 'cpw.mods:modlauncher:10.0.1'
   implementation 'cpw.mods:bootstraplauncher:1.1.0'
   implementation 'cpw.mods:securejarhandler:2.0.3'
-  implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
+  implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
   implementation 'net.sf.jopt-simple:jopt-simple:5.0.5'
-  implementation 'com.googlecode.json-simple:json-simple:1.4.1'
+  implementation "org.apache.logging.log4j:log4j-jul:2.17.2"
+  implementation "com.googlecode.json-simple:json-simple:1.4.1"
+  compileClasspath 'org.jetbrains:annotations:23.0.0'
   runtimeClasspath rootProject
 }

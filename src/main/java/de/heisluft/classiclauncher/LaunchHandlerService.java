@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 
 import joptsimple.OptionParser;
+import org.apache.logging.log4j.jul.Log4jBridgeHandler;
 
 public class LaunchHandlerService implements ILaunchHandlerService {
 
@@ -34,6 +35,11 @@ public class LaunchHandlerService implements ILaunchHandlerService {
   public static final Map<String, String> APPLET_PARAMS = new HashMap<>();
   private static final Marker MARKER = MarkerManager.getMarker("SERVICE");
   public static Path gameDir, assetsDir;
+
+
+  static {
+    Log4jBridgeHandler.install(true, "", true);
+  }
 
   @Override
   public String name() {
