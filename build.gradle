@@ -1,36 +1,38 @@
 plugins {
-  id 'java'
+  id 'de.heisluft.modding.classic'
 }
 
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(16))
+group 'de.heisluft'
+version '0.0.1'
 
-tasks.withType(JavaCompile) {
-  dependsOn(rootProject.getTasks().getByName("classes"))
-  options.encoding 'UTF-8'
-  sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
+classicMC {
+  version  = 'c0.30_c'
 }
 
-configurations.getByName('implementation').exclude('group': 'com.mojang', 'module': 'minecraft-assets')
-
-repositories {
-  maven {
-    url 'https://heisluft.de/maven/'
-  }
-  maven {
-    url 'https://maven.minecraftforge.net/'
-  }
-  mavenCentral()
+makeCPFile {
+  paths.addAll sourceSets.getByName("main").output.classesDirs
+  paths.add sourceSets.getByName("main").output.resourcesDir
 }
 
 dependencies {
-  runtimeClasspath "org.fusesource.jansi:jansi:2.4.0"
-  implementation 'cpw.mods:modlauncher:10.0.1'
-  implementation 'cpw.mods:bootstraplauncher:1.1.0'
-  implementation 'cpw.mods:securejarhandler:2.0.3'
-  implementation 'org.apache.logging.log4j:log4j-core:2.17.2'
-  implementation 'net.sf.jopt-simple:jopt-simple:5.0.5'
   implementation "org.apache.logging.log4j:log4j-jul:2.17.2"
   implementation "com.googlecode.json-simple:json-simple:1.4.1"
+  runtimeClasspath 'de.heisluft.deobf.data:c0.30_c:20220718@zip'
   compileClasspath 'org.jetbrains:annotations:23.0.0'
-  runtimeClasspath rootProject
 }
+
+genBSLRun {
+  jvmArgs.add "-Dhcl.mcDistType=UNZIPPED"
+  jvmArgs.add "-Dlog4j.skipJansi=false"
+  appArgs.add "--launchTarget=classiclauncher"
+  workDir.set '$PROJECT_DIR$/run'
+}
+
+tasks.register("mcJar", org.gradle.jvm.tasks.Jar.class).configure {
+  it.archiveBaseName.set("minecraft")
+  it.archiveVersion.set(classicMC.version)
+  it.archiveClassifier.set("recomp")
+  it.from sourceSets.mc.output.classesDirs
+}
+
+classes.dependsOn(mcClasses)
