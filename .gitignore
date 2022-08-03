@@ -1,1 +1,6 @@
 build/
+.gradle/
+.idea/
+out/
+run/
+src/mc/
