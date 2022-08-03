@@ -1,5 +1,5 @@
 plugins {
-  id 'de.heisluft.modding.classic' version '0.0.1+51'
+  id 'de.heisluft.modding.classic' version '0.0.1+59'
 }
 
 group 'de.heisluft'
@@ -17,8 +17,8 @@ makeCPFile {
 dependencies {
   implementation "org.apache.logging.log4j:log4j-jul:2.17.2"
   implementation "com.googlecode.json-simple:json-simple:1.4.1"
-  runtimeClasspath 'de.heisluft.deobf.data:c0.30_c:20220718@zip'
-  compileClasspath 'org.jetbrains:annotations:23.0.0'
+  runtimeOnly 'de.heisluft.deobf.data:c0.30_c:20220718@zip'
+  compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
 genBSLRun {
