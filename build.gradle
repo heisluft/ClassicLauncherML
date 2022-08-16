@@ -1,5 +1,5 @@
 plugins {
-  id 'de.heisluft.modding.classic' version '0.0.1+59'
+  id 'de.heisluft.modding.classic' version '0.0.1+71'
 }
 
 group 'de.heisluft'
@@ -15,7 +15,7 @@ makeCPFile {
 }
 
 dependencies {
-  implementation "org.apache.logging.log4j:log4j-jul:2.17.2"
+  implementation 'org.apache.logging.log4j:log4j-jul:2.18.0'
   implementation "com.googlecode.json-simple:json-simple:1.4.1"
   runtimeOnly 'de.heisluft.deobf.data:c0.30_c:20220718@zip'
   compileOnly 'org.jetbrains:annotations:23.0.0'
@@ -23,16 +23,7 @@ dependencies {
 
 genBSLRun {
   jvmArgs.add "-Dhcl.mcDistType=UNZIPPED"
-  jvmArgs.add "-Dlog4j.skipJansi=false"
   appArgs.add "--launchTarget=classiclauncher"
-  workDir.set '$PROJECT_DIR$/run'
-}
-
-tasks.register("mcJar", org.gradle.jvm.tasks.Jar.class).configure {
-  it.archiveBaseName.set("minecraft")
-  it.archiveVersion.set(classicMC.version)
-  it.archiveClassifier.set("recomp")
-  it.from sourceSets.mc.output.classesDirs
 }
 
 classes.dependsOn(mcClasses)
