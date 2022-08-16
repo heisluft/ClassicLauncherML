@@ -1,5 +1,5 @@
 plugins {
-  id 'de.heisluft.modding.classic' version '0.0.1+71'
+  id 'de.heisluft.modding.classic' version '0.0.1+72'
 }
 
 group 'de.heisluft'
@@ -25,5 +25,3 @@ genBSLRun {
   jvmArgs.add "-Dhcl.mcDistType=UNZIPPED"
   appArgs.add "--launchTarget=classiclauncher"
 }
-
-classes.dependsOn(mcClasses)
