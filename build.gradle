@@ -1,5 +1,5 @@
 plugins {
-  id 'de.heisluft.modding.classic' version '0.0.1+72'
+  id 'de.heisluft.modding.classic.jarmoddev' version '0.1.0+1'
 }
 
 group 'de.heisluft'
