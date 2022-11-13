@@ -38,7 +38,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
 
 
   static {
-    Log4jBridgeHandler.install(true, "", true);
+    Log4jBridgeHandler.install(true, "", false);
   }
 
   @Override
