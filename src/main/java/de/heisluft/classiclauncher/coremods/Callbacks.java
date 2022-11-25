@@ -24,6 +24,7 @@ public class Callbacks {
   private static final Marker MARKER = MarkerManager.getMarker("CALLBACK");
 
   private static Method addMusicMethod, addSoundMethod;
+  private static boolean newSoundSystem;
   private static Object soundManager;
 
   private static void addMusic(Path path, String name) {
@@ -36,15 +37,18 @@ public class Callbacks {
 
   private static void addSound(Path path, String name) {
     try {
-      addSoundMethod.invoke(soundManager, path.toFile(), name);
+      if(newSoundSystem) addSoundMethod.invoke(soundManager, name, path.toFile());
+      else addSoundMethod.invoke(soundManager, path.toFile(), name);
     } catch (IllegalAccessException | InvocationTargetException e) {
       LOGGER.error(MARKER, "Error invoking addSound!", e);
     }
   }
-  public static void callback(Object mc, String soundManagerFName, String addSoundMName, String addMusicMName) throws Exception {
+  public static void callback(Object mc, String soundManagerFName, String addSoundMName, String addMusicMName, boolean newSoundSystem) throws Exception {
     soundManager = mc.getClass().getField(soundManagerFName).get(mc);
-    addMusicMethod = soundManager.getClass().getMethod(addMusicMName, String.class, File.class);
-    addSoundMethod = soundManager.getClass().getMethod(addSoundMName, File.class, String.class);
+    Class<?> smc = soundManager.getClass();
+    Callbacks.newSoundSystem = newSoundSystem;
+    addMusicMethod = smc.getMethod(addMusicMName, String.class, File.class);
+    addSoundMethod = newSoundSystem ? smc.getMethod(addSoundMName, String.class, File.class) : smc.getMethod(addSoundMName, File.class, String.class);
     LOGGER.info(MARKER, "Setup Finished, downloading assets");
     run();
   }

@@ -35,6 +35,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
   public static final Map<String, String> APPLET_PARAMS = new HashMap<>();
   private static final Marker MARKER = MarkerManager.getMarker("SERVICE");
   public static Path gameDir, assetsDir;
+  public static String mcVersion;
 
 
   static {
@@ -56,7 +57,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
     OptionSpec<Path> gameDirSpec = parser.accepts("gameDir").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Path.of("."));
     OptionSpec<Path> assetsDirSpec = parser.accepts("assetsDir").withRequiredArg().withValuesConvertedBy(new PathConverter());
     OptionSet optionSet = parser.parse(arguments);
-    String gameVersion = optionSet.valueOf(versionSpec);
+    mcVersion = optionSet.valueOf(versionSpec);
     gameDir = optionSet.valueOf(gameDirSpec);
     assetsDir = optionSet.has(assetsDirSpec) ? optionSet.valueOf(assetsDirSpec) : gameDir.resolve("resources");
     List<?> s = optionSet.nonOptionArguments();
@@ -79,7 +80,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
       System.setProperty("org.lwjgl.librarypath", libspath);
       System.setProperty("net.java.games.input.librarypath", libspath);
 
-      Frame frame = new Frame("minecraft " + gameVersion);
+      Frame frame = new Frame("minecraft " + mcVersion);
       frame.setSize(1280, 720);
       frame.setResizable(false);
       frame.addWindowListener(new WindowAdapter() {

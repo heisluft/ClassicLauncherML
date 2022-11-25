@@ -31,7 +31,8 @@ public class AssetReflux implements CoreMod {
     }
     if(!foundBoolean || !foundFile) return false;
     LOGGER.info(MARKER, "Found the BackgroundDownload Thread");
-
+    boolean newSoundSystem = LaunchHandlerService.mcVersion.startsWith("in-2010");
+    if(newSoundSystem) LOGGER.warn(MARKER, "New SoundSystem is used, detection may be unstable across mc versions.");
 
     // The name of the soundManager field within Minecraft.class
     String soundManagerFieldName = null;
@@ -114,8 +115,10 @@ public class AssetReflux implements CoreMod {
               if("(Ljava/io/File;Ljava/lang/String;)V".equals(theCall.desc)) {
                 LOGGER.info(MARKER, "Found the addSound method. (" + theCall.name + ")");
                 soundManagerAddSoundMethodName = theCall.name;
-              }
-              else {
+              } else if(soundManagerAddSoundMethodName == null && newSoundSystem) {
+                LOGGER.info(MARKER, "Found the addSound method. (" + theCall.name + ")");
+                soundManagerAddSoundMethodName = theCall.name;
+              } else {
                 LOGGER.info(MARKER, "Found the addMusic method. (" + theCall.name + ")");
                 soundManagerAddMusicMethodName = theCall.name;
               }
@@ -125,14 +128,14 @@ public class AssetReflux implements CoreMod {
         // If our heuristics failed, its better not to modify the bytecode at all
         if(soundManagerFieldName != null && soundManagerAddSoundMethodName != null && soundManagerAddMusicMethodName != null) {
           LOGGER.info(MARKER, "CoreMod Setup successful! now inserting the proxy call");
-          // AssetRefluxCallback.callback(this.mc); return;
           mn.instructions.clear();
           mn.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
           mn.instructions.add(new FieldInsnNode(Opcodes.GETFIELD, node.name, mcFieldName, mcFieldDesc));
           mn.instructions.add(new LdcInsnNode(soundManagerFieldName));
           mn.instructions.add(new LdcInsnNode(soundManagerAddSoundMethodName));
           mn.instructions.add(new LdcInsnNode(soundManagerAddMusicMethodName));
-          mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, CALLBACK_CLASSNAME, "callback", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"));
+          mn.instructions.add(new InsnNode(newSoundSystem ? Opcodes.ICONST_1 : Opcodes.ICONST_0));
+          mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, CALLBACK_CLASSNAME, "callback", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V"));
           mn.instructions.add(new InsnNode(Opcodes.RETURN));
           mn.tryCatchBlocks.clear();
           mn.localVariables = null;
