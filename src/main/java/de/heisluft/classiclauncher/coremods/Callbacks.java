@@ -66,7 +66,7 @@ public class Callbacks {
       String hash = ((JSONObject) e.getValue()).getString("hash");
       Path outFile = LaunchHandlerService.assetsDir.resolve(resName);
       byte[] buf = new byte[4096];
-      InputStream is2 = new URL("http://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash).openStream();
+      InputStream is2 = new URL("https://resources.download.minecraft.net/" + hash.substring(0, 2) + "/" + hash).openStream();
       OutputStream fos = Files.newOutputStream(outFile);
       int read;
       while((read = is2.read(buf)) != -1) fos.write(buf, 0, read);
