@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import de.heisluft.classiclauncher.awt.MCAppletStub;
+import de.heisluft.classiclauncher.perf.Profiler;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 import joptsimple.util.PathConverter;
@@ -56,11 +57,13 @@ public class LaunchHandlerService implements ILaunchHandlerService {
     OptionSpec<String> versionSpec = parser.accepts("version").withRequiredArg().defaultsTo("N/A");
     OptionSpec<Path> gameDirSpec = parser.accepts("gameDir").withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Path.of("."));
     OptionSpec<Path> assetsDirSpec = parser.accepts("assetsDir").withRequiredArg().withValuesConvertedBy(new PathConverter());
+    OptionSpec<Integer> profiling = parser.accepts("profiling").withOptionalArg().ofType(int.class).defaultsTo(100);
     OptionSet optionSet = parser.parse(arguments);
     mcVersion = optionSet.valueOf(versionSpec);
     gameDir = optionSet.valueOf(gameDirSpec);
     assetsDir = optionSet.has(assetsDirSpec) ? optionSet.valueOf(assetsDirSpec) : gameDir.resolve("resources");
     List<?> s = optionSet.nonOptionArguments();
+    int profilerInterval = optionSet.has(profiling) ? optionSet.valueOf(profiling) : -1;
     for(int i = 0; i < s.size() / 2; i++) APPLET_PARAMS.put(s.get(i*2).toString(), s.get(i*2+1).toString());
 
     return () -> {
@@ -86,6 +89,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
       frame.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
+          Profiler.stop();
           System.exit(1);
         }
       });
@@ -104,6 +108,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
       frame.add(applet);
       frame.pack();
       frame.setVisible(true);
+      if(profilerInterval > 0) Profiler.start(profilerInterval);
 
       applet.init();
       applet.start();
