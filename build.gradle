@@ -1,12 +1,12 @@
 plugins {
-  id 'de.heisluft.modding.classic.jarmoddev' version '0.2.2-pre+10'
+  id 'de.heisluft.modding.classic.jarmoddev' version '0.2.2-pre+27'
 }
 
 group 'de.heisluft'
 version '0.0.1'
 
 classicMC {
-  version  = 'in-20091231-2'
+  version  = 'in-20100105'
   mappingType 'source'
 }
 
@@ -18,7 +18,6 @@ makeCPFile {
 dependencies {
   implementation 'org.apache.logging.log4j:log4j-jul:2.18.0'
   implementation "com.googlecode.json-simple:json-simple:1.4.1"
-  runtimeOnly 'de.heisluft.deobf.data:c0.30_c:20220718@zip'
   compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
