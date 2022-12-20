@@ -25,7 +25,3 @@ genBSLRun {
   jvmArgs.add "-Dhcl.mcDistType=UNZIPPED"
   appArgs.add "--launchTarget=classiclauncher"
 }
-
-repositories {
-  mavenCentral()
-}
