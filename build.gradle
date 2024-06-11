@@ -1,5 +1,5 @@
 plugins {
- id 'de.heisluft.modding.classic.deobfdatadev' version '0.3.0-pre+37'
+ id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+50'
 }
 
 group 'de.heisluft'
