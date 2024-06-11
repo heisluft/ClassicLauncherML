@@ -1,7 +1,6 @@
 package de.heisluft.classiclauncher;
 
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
-import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import cpw.mods.modlauncher.api.ServiceRunner;
 
 import java.applet.Applet;
@@ -47,9 +46,6 @@ public class LaunchHandlerService implements ILaunchHandlerService {
   public String name() {
     return "classiclauncher";
   }
-
-  @Override
-  public void configureTransformationClassLoader(ITransformingClassLoaderBuilder builder) {}
 
   @Override
   public ServiceRunner launchService(String[] arguments, ModuleLayer gameLayer) {

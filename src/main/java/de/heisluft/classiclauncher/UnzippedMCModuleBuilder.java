@@ -1,5 +1,6 @@
 package de.heisluft.classiclauncher;
 
+import cpw.mods.jarhandling.JarContentsBuilder;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
 import cpw.mods.modlauncher.api.*;
@@ -55,7 +56,7 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
   }
 
   @Override
-  public List<ITransformer> transformers() {
+  public @NotNull List<? extends ITransformer<?>> transformers() {
     if(isNoop) return List.of();
     return List.of();
   }
@@ -81,7 +82,7 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
     Path assetsJarPath = Arrays.stream(legacyCP.split(File.pathSeparator))
         .filter(s -> s.substring(s.lastIndexOf(File.separatorChar) + 1).startsWith("minecraft-assets-"))
         .map(Path::of).findAny().orElseThrow(() -> new RuntimeException("Cannot find assets jar on the classpath"));
-    return List.of(new Resource(IModuleLayerManager.Layer.GAME, List.of(SecureJar.from(j -> new JarMetadata() {
+    return List.of(new Resource(IModuleLayerManager.Layer.GAME, List.of(SecureJar.from(new JarContentsBuilder().paths(mcClassesPath, assetsJarPath).build(), new JarMetadata() {
       private final Set<String> packages;
 
       {
@@ -105,6 +106,6 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
       @Override
       public ModuleDescriptor descriptor() {
         return ModuleDescriptor.newAutomaticModule(name()).packages(packages).build();
-      }}, mcClassesPath, assetsJarPath))));
+      }}))));
   }
 }
