@@ -19,10 +19,11 @@ public class CoreModManager implements ILaunchPluginService {
   public CoreModManager() {
     coreMods.put(Phase.BEFORE, new HashSet<>());
     coreMods.put(Phase.AFTER, new HashSet<>());
-    coreMods.get(Phase.BEFORE).add(new ComparatorFixer());
-    coreMods.get(Phase.BEFORE).add(new URLTransformer());
-    coreMods.get(Phase.BEFORE).add(new AssetReflux());
-    coreMods.get(Phase.BEFORE).add(new GameDirChanger());
+    coreMods.get(Phase.AFTER).add(new ComparatorFixer());
+    coreMods.get(Phase.AFTER).add(new URLTransformer());
+    coreMods.get(Phase.AFTER).add(new AssetReflux());
+    coreMods.get(Phase.AFTER).add(new GameDirChanger());
+    coreMods.get(Phase.AFTER).add(new UserCheckBypass());
     String preMods = coreMods.get(Phase.BEFORE).stream().map(CoreMod::name).collect(Collectors.joining(", ", "[", "]"));
     String postMods = coreMods.get(Phase.AFTER).stream().map(CoreMod::name).collect(Collectors.joining(", ", "[", "]"));
     LOGGER.info(MARKER, "Launching with the following coremods: BEFORE: {}, AFTER: {}", preMods, postMods);

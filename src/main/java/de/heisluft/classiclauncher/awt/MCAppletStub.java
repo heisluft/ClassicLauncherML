@@ -6,6 +6,8 @@ import org.apache.logging.log4j.MarkerManager;
 import java.applet.AppletContext;
 import java.applet.AppletStub;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import static de.heisluft.classiclauncher.LaunchHandlerService.*;
@@ -25,8 +27,8 @@ public class MCAppletStub implements AppletStub {
   @Override
   public URL getDocumentBase() {
     try {
-      return new URL("http://localhost/");
-    } catch (MalformedURLException e) {
+      return new URI("http://localhost/").toURL();
+    } catch (MalformedURLException | URISyntaxException e) {
       e.printStackTrace();
     }
     return null;
@@ -35,8 +37,8 @@ public class MCAppletStub implements AppletStub {
   @Override
   public URL getCodeBase() {
     try {
-      return new URL("http://localhost/");
-    } catch (MalformedURLException e) {
+      return new URI("http://localhost/").toURL();
+    } catch (MalformedURLException | URISyntaxException e) {
       e.printStackTrace();
     }
     return null;
