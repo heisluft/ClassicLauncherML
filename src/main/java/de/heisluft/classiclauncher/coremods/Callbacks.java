@@ -43,17 +43,17 @@ public class Callbacks {
       LOGGER.error(MARKER, "Error invoking addSound!", e);
     }
   }
-  public static void callback(Object mc, String soundManagerFName, String addSoundMName, String addMusicMName, boolean newSoundSystem) throws Exception {
+  public static void callback(Object mc, String soundManagerFName, String addSoundMName, String addMusicMName, boolean newSoundSystem, boolean loadNewSound) throws Exception {
     soundManager = mc.getClass().getField(soundManagerFName).get(mc);
     Class<?> smc = soundManager.getClass();
     Callbacks.newSoundSystem = newSoundSystem;
     addMusicMethod = smc.getMethod(addMusicMName, String.class, File.class);
     addSoundMethod = newSoundSystem ? smc.getMethod(addSoundMName, String.class, File.class) : smc.getMethod(addSoundMName, File.class, String.class);
     LOGGER.info(MARKER, "Setup Finished, downloading assets");
-    run();
+    run(loadNewSound);
   }
 
-  public static void run() throws IOException, ParseException {
+  public static void run(boolean loadNewSound) throws IOException, ParseException {
     URL assetsIndex = new URL("https://launchermeta.mojang.com/v1/packages/4759bad2824e419da9db32861fcdc3a274336532/pre-1.6.json");
     InputStream is = assetsIndex.openStream();
     JSONObject object = (JSONObject) new JSONParser().parse(new InputStreamReader(is));
@@ -73,7 +73,7 @@ public class Callbacks {
       is2.close();
       fos.close();
       if(resName.startsWith("music/")) addMusic(outFile, resName.substring(resName.indexOf('/') + 1));
-      if(resName.startsWith("sound/")) addSound(outFile, resName.substring(resName.indexOf('/') + 1));
+      if(resName.startsWith("sound/") || loadNewSound && resName.startsWith("newsound/")) addSound(outFile, resName.substring(resName.indexOf('/') + 1));
     }
     LOGGER.info(MARKER, "Successfully loaded in all assets!");
   }

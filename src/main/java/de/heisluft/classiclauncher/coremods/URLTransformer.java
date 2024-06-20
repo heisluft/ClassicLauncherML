@@ -1,5 +1,5 @@
 package de.heisluft.classiclauncher.coremods;
-import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Handle;
@@ -15,7 +15,7 @@ public class URLTransformer implements CoreMod {
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
-  public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
+  public boolean processClass(ClassNode node, Type classType) {
     boolean dirty = false;
     for(MethodNode mn : node.methods) {
       for(AbstractInsnNode ain : mn.instructions) {
@@ -64,6 +64,11 @@ public class URLTransformer implements CoreMod {
         if("http://www.minecraft.net/skin/".equals(lin.cst)) {
           LOGGER.info(MARKER, "Proxying Skin URL in " + node.name + "#" + mn.name + mn.desc);
           lin.cst = "http://localhost/mcspoof/skin.php?skin=";
+          dirty = true;
+        }
+        if("http://www.minecraft.net/".equals(lin.cst)) {
+          LOGGER.info(MARKER, "Proxying Applet base URL in " + node.name + "#" + mn.name + mn.desc);
+          lin.cst = "http://localhost";
           dirty = true;
         }
       }

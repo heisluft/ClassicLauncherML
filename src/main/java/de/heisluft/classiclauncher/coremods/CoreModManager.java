@@ -8,25 +8,25 @@ import org.apache.logging.log4j.MarkerManager;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+
 public class CoreModManager implements ILaunchPluginService {
-  private final Map<Phase, Set<CoreMod>> coreMods = new HashMap<>();
+  private final Set<CoreMod> coreMods = new HashSet<>();
   private static final Logger LOGGER = LogManager.getLogger();
   private static final Marker MARKER = MarkerManager.getMarker("LAUNCHPLUGIN");
 
   public CoreModManager() {
-    coreMods.put(Phase.BEFORE, new HashSet<>());
-    coreMods.put(Phase.AFTER, new HashSet<>());
-    coreMods.get(Phase.AFTER).add(new ComparatorFixer());
-    coreMods.get(Phase.AFTER).add(new URLTransformer());
-    coreMods.get(Phase.AFTER).add(new AssetReflux());
-    coreMods.get(Phase.AFTER).add(new GameDirChanger());
-    coreMods.get(Phase.AFTER).add(new UserCheckBypass());
-    String preMods = coreMods.get(Phase.BEFORE).stream().map(CoreMod::name).collect(Collectors.joining(", ", "[", "]"));
-    String postMods = coreMods.get(Phase.AFTER).stream().map(CoreMod::name).collect(Collectors.joining(", ", "[", "]"));
-    LOGGER.info(MARKER, "Launching with the following coremods: BEFORE: {}, AFTER: {}", preMods, postMods);
+    coreMods.add(new ComparatorFixer());
+    coreMods.add(new URLTransformer());
+    coreMods.add(new AssetReflux());
+    coreMods.add(new GameDirChanger());
+    coreMods.add(new AuthCheckBypass());
+    String postMods = coreMods.stream().map(CoreMod::name).collect(Collectors.joining(", ", "[", "]"));
+    LOGGER.info(MARKER, "Launching with the following coremods: {}", postMods);
   }
 
   @Override
@@ -36,11 +36,15 @@ public class CoreModManager implements ILaunchPluginService {
 
   @Override
   public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-    return EnumSet.of(Phase.BEFORE, Phase.AFTER);
+    return EnumSet.of(Phase.AFTER);
   }
 
   @Override
   public boolean processClass(Phase phase, ClassNode classNode, Type classType) {
-    return coreMods.get(phase).stream().anyMatch(c -> c.processClass(phase, classNode, classType));
+    boolean dirty = false;
+    for(CoreMod c : coreMods) {
+      dirty |= c.processClass(classNode, classType);
+    }
+    return dirty;
   }
 }

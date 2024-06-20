@@ -1,6 +1,5 @@
 package de.heisluft.classiclauncher.coremods;
 
-import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import de.heisluft.classiclauncher.LaunchHandlerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,10 +10,11 @@ import org.objectweb.asm.tree.*;
 public class AssetReflux implements CoreMod {
 
   private static final Logger LOGGER = LogManager.getLogger();
+  private boolean didWork = false;
 
   @Override
-  public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
-    if(!"java/lang/Thread".equals(node.superName)) return false;
+  public boolean processClass(ClassNode node, Type classType) {
+    if(didWork || !"java/lang/Thread".equals(node.superName)) return false;
 
     // Check if we have exactly 3 fields, one being Boolean, one being File to increase hit chance
     if(node.fields.size() != 3) return false;
@@ -31,8 +31,10 @@ public class AssetReflux implements CoreMod {
     }
     if(!foundBoolean || !foundFile) return false;
     LOGGER.info(MARKER, "Found the BackgroundDownload Thread");
-    boolean newSoundSystem = LaunchHandlerService.mcVersion.startsWith("in-2010");
-    if(newSoundSystem) LOGGER.warn(MARKER, "New SoundSystem is used, detection may be unstable across mc versions.");
+    String mcVersion = LaunchHandlerService.mcVersion;
+    boolean newSoundSystem = mcVersion.startsWith("in-2010");
+    // We can do this because indev timestamps make strings comparable and 'c' prefix is before 'i'
+    boolean loadNewSounds = mcVersion.compareTo("in-20100111-1") >= 0;
 
     // The name of the soundManager field within Minecraft.class
     String soundManagerFieldName = null;
@@ -135,14 +137,15 @@ public class AssetReflux implements CoreMod {
           mn.instructions.add(new LdcInsnNode(soundManagerAddSoundMethodName));
           mn.instructions.add(new LdcInsnNode(soundManagerAddMusicMethodName));
           mn.instructions.add(new InsnNode(newSoundSystem ? Opcodes.ICONST_1 : Opcodes.ICONST_0));
-          mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, CALLBACK_CLASSNAME, "callback", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V"));
+          mn.instructions.add(new InsnNode(loadNewSounds ? Opcodes.ICONST_1 : Opcodes.ICONST_0));
+          mn.instructions.add(new MethodInsnNode(Opcodes.INVOKESTATIC, CALLBACK_CLASSNAME, "callback", "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V"));
           mn.instructions.add(new InsnNode(Opcodes.RETURN));
           mn.tryCatchBlocks.clear();
           mn.localVariables = null;
         }
       }
     }
-
+    didWork = true;
     return true;
   }
 }

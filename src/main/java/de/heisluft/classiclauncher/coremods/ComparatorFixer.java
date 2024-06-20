@@ -1,6 +1,5 @@
 package de.heisluft.classiclauncher.coremods;
 
-import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
@@ -21,7 +20,7 @@ public class ComparatorFixer implements CoreMod {
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Override
-  public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
+  public boolean processClass(ClassNode node, Type classType) {
     if(node.interfaces.size() != 1 || !node.interfaces.get(0).equals("java/util/Comparator"))
       return false;
 

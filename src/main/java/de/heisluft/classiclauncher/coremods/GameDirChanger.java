@@ -1,6 +1,5 @@
 package de.heisluft.classiclauncher.coremods;
 
-import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import de.heisluft.classiclauncher.LaunchHandlerService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,10 +9,11 @@ import org.objectweb.asm.tree.*;
 
 public class GameDirChanger implements CoreMod {
   private static final Logger LOGGER = LogManager.getLogger();
+  private boolean didWork;
 
   @Override
-  public boolean processClass(ILaunchPluginService.Phase phase, ClassNode node, Type classType) {
-    if(!node.interfaces.contains("java/lang/Runnable")) return false;
+  public boolean processClass(ClassNode node, Type classType) {
+    if(didWork || !node.interfaces.contains("java/lang/Runnable")) return false;
 
     MethodNode runMethod = null;
     for(final MethodNode methodNode : node.methods) {
@@ -55,6 +55,8 @@ public class GameDirChanger implements CoreMod {
 
     runMethod.instructions.insert(lastJump, new VarInsnNode(Opcodes.ASTORE, var));
     runMethod.instructions.insert(lastJump, new MethodInsnNode(Opcodes.INVOKESTATIC, CALLBACK_CLASSNAME, "gameDir", "()Ljava/io/File;"));
-    return false;
+
+    didWork = true;
+    return true;
   }
 }
