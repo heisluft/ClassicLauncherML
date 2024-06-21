@@ -68,9 +68,13 @@ public class LaunchHandlerService implements ILaunchHandlerService {
       if(!Files.isDirectory(libsDir)) Files.createDirectories(libsDir);
       List<Path> children = Files.walk(libsDir).filter(Predicate.not(libsDir::equals)).toList();
       String osName = System.getProperty("os.name").toLowerCase();
+      for(Module module : gameLayer.modules()) {
+        System.out.println(module.getName() + "@" + module.getDescriptor().version().orElse(null));
+      }
+      Module mcModule = gameLayer.findModule("minecraft").orElseThrow();
       Natives natives = osName.contains("win") ? Natives.WIN : osName.contains("mac") ? Natives.MAC : Natives.LINUX;
       if(children.size() < natives.fileCount){
-        for(URL url : natives.getURLs()) {
+        for(URL url : natives.getURLs(mcModule.getClassLoader())) {
           String urlString = url.toString();
           Files.write(libsDir.resolve(urlString.substring(urlString.lastIndexOf('/') + 1)), url.openStream().readAllBytes());
         }
@@ -91,7 +95,6 @@ public class LaunchHandlerService implements ILaunchHandlerService {
       });
 
       LOGGER.info(MARKER, "Starting minecraft");
-      Module mcModule = gameLayer.findModule("minecraft").orElseThrow();
       Class<?> appletClass = Class.forName(mcModule, "net.minecraft.client.MinecraftApplet");
       if(appletClass == null) {
         appletClass = Class.forName(mcModule, "com.mojang.minecraft.MinecraftApplet");

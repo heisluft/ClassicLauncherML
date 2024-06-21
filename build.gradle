@@ -1,5 +1,5 @@
 plugins {
- id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+82'
+ id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+89'
 }
 
 group 'de.heisluft'
@@ -22,6 +22,6 @@ dependencies {
 }
 
 genBSLRun {
-  jvmArgs.add "-Dhcl.mcDistType=UNZIPPED"
+  systemProperties.put("hcl.mcDistType", "UNZIPPED")
   appArgs.add "--launchTarget=classiclauncher"
 }

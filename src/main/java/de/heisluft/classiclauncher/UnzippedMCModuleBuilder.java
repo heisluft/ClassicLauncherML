@@ -1,5 +1,6 @@
 package de.heisluft.classiclauncher;
 
+import cpw.mods.jarhandling.JarContents;
 import cpw.mods.jarhandling.JarContentsBuilder;
 import cpw.mods.jarhandling.JarMetadata;
 import cpw.mods.jarhandling.SecureJar;
@@ -9,21 +10,18 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.lang.module.ModuleDescriptor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class UnzippedMCModuleBuilder implements ITransformationService {
 
   private String mcVersion;
-  private Path mcClassesPath;
   private boolean isNoop;
 
   private static final Logger LOGGER = LogManager.getLogger();
@@ -45,14 +43,7 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
     if(MCDistType.getFromEnvironment() != MCDistType.UNZIPPED) {
       isNoop = true;
       LOGGER.info(MARKER, "Setting to noop because MC distribution is not UNZIPPED");
-      return;
     }
-    String mcClassDir = System.getProperty("mccl.mcClasses.dir");
-    if(mcClassDir == null)
-      throw new IncompatibleEnvironmentException("MC Classes Dir is not set - we wont be able to load in minecraft as a module");
-    if(!Files.isDirectory(mcClassesPath = Path.of(mcClassDir)))
-      throw new IncompatibleEnvironmentException("MC Classes Property does not point to an existing Directory");
-    LOGGER.info(MARKER, "Setting MC classes path to {}", mcClassesPath);
   }
 
   @Override
@@ -61,51 +52,61 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
     return List.of();
   }
 
-  private static Set<String> getPackages(Path p) throws IOException {
-    try {
-      return Files.walk(p).filter(Predicate.not(p::equals)).filter(Files::isDirectory).filter(p2 -> {
-        try {
-          return Files.walk(p2, 1).anyMatch(Files::isRegularFile);
-        } catch (IOException ex) {
-          throw new UncheckedIOException(ex);
-        }
-      }).map(p::relativize).map(Path::toString).map(s -> s.replace('\\', '.').replace('/', '.')).collect(Collectors.toSet());
-    } catch (UncheckedIOException e) {
-      throw e.getCause();
-    }
+  private static SecureJar customMerged(String customName, String customVersion, JarContents contents) {
+    return SecureJar.from(contents, new JarMetadata() {
+      @Override
+      public String name() {
+        return customName;
+      }
+
+      @Override
+      public @Nullable String version() {
+        return customVersion;
+      }
+
+      @Override
+      public ModuleDescriptor descriptor() {
+        return ModuleDescriptor.newAutomaticModule(name()).version(customVersion).packages(contents.getPackages()).build();
+      }
+    });
   }
 
   @Override
   public List<Resource> completeScan(IModuleLayerManager layerManager) {
     if(isNoop) return List.of();
-    String legacyCP = Objects.requireNonNull(System.getProperty("legacyClassPath"), "legacy Classpath property is not set???");
-    Path assetsJarPath = Arrays.stream(legacyCP.split(File.pathSeparator))
-        .filter(s -> s.substring(s.lastIndexOf(File.separatorChar) + 1).startsWith("minecraft-assets-"))
-        .map(Path::of).findAny().orElseThrow(() -> new RuntimeException("Cannot find assets jar on the classpath"));
-    return List.of(new Resource(IModuleLayerManager.Layer.GAME, List.of(SecureJar.from(new JarContentsBuilder().paths(mcClassesPath, assetsJarPath).build(), new JarMetadata() {
-      private final Set<String> packages;
+    List<Path> mcCP;
+    try {
+      mcCP = Files.readAllLines(Path.of(Objects.requireNonNull(System.getProperty("gameClassPath.file"), "Game Classpath property is not set???"))).stream().map(Path::of).collect(Collectors.toList());
+    } catch(IOException e) {
+      throw new RuntimeException(e);
+    }
 
-      {
-        try {
-          packages = getPackages(mcClassesPath);
-        } catch (IOException e) {
-          throw new UncheckedIOException(e);
-        }
-      }
+    Path mcClassesPath = mcCP.stream()
+        .filter(Files::isDirectory).findAny().orElseThrow(() -> new RuntimeException("Cannot find minecraft classes"));
+    mcCP.remove(mcClassesPath);
+    Path assetsJarPath = mcCP.stream()
+        .filter(s -> s.getFileName().toString().startsWith("minecraft-assets-"))
+        .findAny().orElseThrow(() -> new RuntimeException("Cannot find assets jar on the classpath"));
+    mcCP.remove(assetsJarPath);
 
-      @Override
-      public String name() {
-        return "minecraft";
-      }
+    Path[] paulsPaths = mcCP.stream().filter(a -> a.toString().contains("paulscode")).toArray(Path[]::new);
+    for(Path paulsPath : paulsPaths) mcCP.remove(paulsPath);
 
-      @Override
-      public String version() {
-        return mcVersion;
-      }
-
-      @Override
-      public ModuleDescriptor descriptor() {
-        return ModuleDescriptor.newAutomaticModule(name()).packages(packages).build();
-      }}))));
+    List<SecureJar> jars = new ArrayList<>();
+    String mcModuleVersion = mcVersion.startsWith("inf-") ?
+        mcVersion.substring(3) + "-infdev" :
+        mcVersion.startsWith("in-") ?
+            mcVersion.substring(3) + "-indev" :
+            mcVersion.startsWith("c") ?
+                mcVersion.substring(1) + "-classic" :
+                mcVersion.matches("\\d") ?
+                    mcVersion.substring(mcVersion.indexOf(mcVersion.chars().filter(
+                                i -> i >= '0' && i <= '9'
+                            ).findFirst().orElseThrow())) :
+                    null;
+    jars.add(customMerged("paulscode", "1.0.1", new JarContentsBuilder().paths(paulsPaths).build()));
+    jars.add(customMerged("minecraft", mcModuleVersion, new JarContentsBuilder().paths(mcClassesPath, assetsJarPath).build()));
+    for(Path path : mcCP) jars.add(SecureJar.from(path));
+    return List.of(new Resource(IModuleLayerManager.Layer.GAME, jars));
   }
 }

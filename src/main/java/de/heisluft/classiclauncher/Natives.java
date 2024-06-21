@@ -15,9 +15,8 @@ enum Natives {
     fileCount = baseNames.length;
   }
 
-  public URL[] getURLs() {
+  public URL[] getURLs(ClassLoader loader) {
     URL[] urls = new URL[baseNames.length];
-    ClassLoader loader = Natives.class.getClassLoader();
     if(this == MAC) {
       for(int i = 0; i < baseNames.length; i++) urls[i] = loader.getResource(baseNames[i]);
       return urls;

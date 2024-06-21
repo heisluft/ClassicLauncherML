@@ -1,1 +1,4 @@
 Automatic-Module-Name: de.heisluft.classiclauncher
+Specification-Title: ClassicLauncherML
+Specification-Vendor: de.heisluft
+Specification-Version: 0.0.1

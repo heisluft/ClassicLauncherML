@@ -25,6 +25,7 @@ public class CoreModManager implements ILaunchPluginService {
     coreMods.add(new AssetReflux());
     coreMods.add(new GameDirChanger());
     coreMods.add(new AuthCheckBypass());
+    coreMods.add(new PrintTransformer());
     String postMods = coreMods.stream().map(CoreMod::name).collect(Collectors.joining(", ", "[", "]"));
     LOGGER.info(MARKER, "Launching with the following coremods: {}", postMods);
   }
