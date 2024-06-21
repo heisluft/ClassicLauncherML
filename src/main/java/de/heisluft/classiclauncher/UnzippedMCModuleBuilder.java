@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.module.ModuleDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -54,6 +56,8 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
 
   private static SecureJar customMerged(String customName, String customVersion, JarContents contents) {
     return SecureJar.from(contents, new JarMetadata() {
+      final String version = customVersion == null ? JarMetadata.from(contents).version() : customVersion;
+
       @Override
       public String name() {
         return customName;
@@ -61,12 +65,12 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
 
       @Override
       public @Nullable String version() {
-        return customVersion;
+        return version;
       }
 
       @Override
       public ModuleDescriptor descriptor() {
-        return ModuleDescriptor.newAutomaticModule(name()).version(customVersion).packages(contents.getPackages()).build();
+        return ModuleDescriptor.newAutomaticModule(name()).version(version()).packages(contents.getPackages()).build();
       }
     });
   }
@@ -104,7 +108,7 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
                                 i -> i >= '0' && i <= '9'
                             ).findFirst().orElseThrow())) :
                     null;
-    jars.add(customMerged("paulscode", "1.0.1", new JarContentsBuilder().paths(paulsPaths).build()));
+    jars.add(customMerged("paulscode", null, new JarContentsBuilder().paths(paulsPaths).build()));
     jars.add(customMerged("minecraft", mcModuleVersion, new JarContentsBuilder().paths(mcClassesPath, assetsJarPath).build()));
     for(Path path : mcCP) jars.add(SecureJar.from(path));
     return List.of(new Resource(IModuleLayerManager.Layer.GAME, jars));
