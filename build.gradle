@@ -6,7 +6,7 @@ group 'de.heisluft'
 version '0.0.1'
 
 classicMC {
-  version  = 'in-20100111-1'
+  version  = 'in-20100125-1'
   mappingType 'source'
 }
 
