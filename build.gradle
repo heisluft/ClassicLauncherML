@@ -1,12 +1,12 @@
 plugins {
- id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+89'
+ id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+97'
 }
 
 group 'de.heisluft'
 version '0.0.1'
 
 classicMC {
-  version  = 'in-20100125-1'
+  version  = 'in-20100125-2'
   mappingType 'source'
 }
 
