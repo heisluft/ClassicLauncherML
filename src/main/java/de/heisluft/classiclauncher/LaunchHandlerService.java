@@ -3,8 +3,7 @@ package de.heisluft.classiclauncher;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ServiceRunner;
 
-import java.applet.Applet;
-import java.awt.*;
+import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import de.heisluft.classiclauncher.awt.MCAppletStub;
+import de.heisluft.classiclauncher.awt.AppletFake;
 import de.heisluft.classiclauncher.perf.Profiler;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -97,8 +96,7 @@ public class LaunchHandlerService implements ILaunchHandlerService {
         appletClass = Class.forName(mcModule, "com.mojang.minecraft.MinecraftApplet");
       }
 
-      Applet applet = (Applet) appletClass.getConstructor().newInstance();
-      applet.setStub(new MCAppletStub());
+      AppletFake applet = (AppletFake) appletClass.getConstructor().newInstance();
       applet.setPreferredSize(frame.getSize());
 
       frame.add(applet);
