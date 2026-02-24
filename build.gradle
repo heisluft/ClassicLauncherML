@@ -1,16 +1,16 @@
 plugins {
- id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+97'
+ id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+120'
 }
 
 group 'de.heisluft'
 version '0.0.1'
 
 classicMC {
-  version  = 'in-20100125-2'
-  mappingType 'source'
+  version = 'in-20100125-2'
+  mappingType = 'fergie'
 }
 
-makeCPFile {
+genCPFiles {
   paths.addAll sourceSets.getByName("main").output.classesDirs
   paths.add sourceSets.getByName("main").output.resourcesDir
 }
@@ -21,7 +21,12 @@ dependencies {
   compileOnly 'org.jetbrains:annotations:23.1.0'
 }
 
-genBSLRun {
-  systemProperties.put("hcl.mcDistType", "UNZIPPED")
-  appArgs.add "--launchTarget=classiclauncher"
+launchMC {
+  jvmArgs += ['-Dhcl.mcDistType=UNZIPPED']
+  jvmArgumentProviders.add({
+    ['-DgameClassPath.file=' + genCPFiles.gameCPFile.asFile.get().absolutePath]
+  } as CommandLineArgumentProvider)
+  argumentProviders.add({
+      ['--launchTarget=classiclauncher', '--version='+ classicMC.version.get()]
+  } as CommandLineArgumentProvider)
 }
