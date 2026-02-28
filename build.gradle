@@ -1,5 +1,5 @@
 plugins {
- id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+120'
+ id 'de.heisluft.modding.classic.jarmoddev' version '0.3.0-pre+141'
 }
 
 group 'de.heisluft'
@@ -22,7 +22,6 @@ dependencies {
 }
 
 launchMC {
-  jvmArgs += ['-Dhcl.mcDistType=UNZIPPED']
   jvmArgumentProviders.add({
     ['-DgameClassPath.file=' + genCPFiles.gameCPFile.asFile.get().absolutePath]
   } as CommandLineArgumentProvider)

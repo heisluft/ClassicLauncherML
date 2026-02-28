@@ -24,33 +24,22 @@ import java.util.stream.Collectors;
 public class UnzippedMCModuleBuilder implements ITransformationService {
 
   private String mcVersion;
-  private boolean isNoop;
-
-  private static final Logger LOGGER = LogManager.getLogger();
-  private static final Marker MARKER = MarkerManager.getMarker("TRANSFORMERSERVICE");
 
   @Override
   public @NotNull String name() {
-    return "hcl-unzipped-mc-module-builder";
+    return "hcl-mc-module-builder";
   }
 
   @Override
   public void initialize(IEnvironment environment) {
-    if(isNoop) return;
     mcVersion = environment.getProperty(IEnvironment.Keys.VERSION.get()).orElseThrow();
   }
 
   @Override
-  public void onLoad(IEnvironment env, Set<String> otherServices) throws IncompatibleEnvironmentException {
-    if(MCDistType.getFromEnvironment() != MCDistType.UNZIPPED) {
-      isNoop = true;
-      LOGGER.info(MARKER, "Setting to noop because MC distribution is not UNZIPPED");
-    }
-  }
+  public void onLoad(IEnvironment env, Set<String> otherServices) {}
 
   @Override
   public @NotNull List<? extends ITransformer<?>> transformers() {
-    if(isNoop) return List.of();
     return List.of();
   }
 
@@ -77,7 +66,6 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
 
   @Override
   public List<Resource> completeScan(IModuleLayerManager layerManager) {
-    if(isNoop) return List.of();
     List<Path> mcCP;
     try {
       mcCP = Files.readAllLines(Path.of(Objects.requireNonNull(System.getProperty("gameClassPath.file"), "Game Classpath property is not set???"))).stream().map(Path::of).collect(Collectors.toList());
@@ -85,13 +73,8 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
       throw new RuntimeException(e);
     }
 
-    Path mcClassesPath = mcCP.stream()
-        .filter(Files::isDirectory).findAny().orElseThrow(() -> new RuntimeException("Cannot find minecraft classes"));
-    mcCP.remove(mcClassesPath);
-    Path assetsJarPath = mcCP.stream()
-        .filter(s -> s.getFileName().toString().startsWith("minecraft-assets-"))
-        .findAny().orElseThrow(() -> new RuntimeException("Cannot find assets jar on the classpath"));
-    mcCP.remove(assetsJarPath);
+    Path mcJarPath = mcCP.stream().filter(f -> ("minecraft-" + mcVersion + ".jar").equals(f.getFileName().toString())).findAny().orElseThrow(() -> new RuntimeException("Cannot find minecraft classes"));
+    mcCP.remove(mcJarPath);
 
     Path[] paulsPaths = mcCP.stream().filter(a -> a.toString().contains("paulscode")).toArray(Path[]::new);
     for(Path paulsPath : paulsPaths) mcCP.remove(paulsPath);
@@ -109,7 +92,7 @@ public class UnzippedMCModuleBuilder implements ITransformationService {
                             ).findFirst().orElseThrow())) :
                     null;
     jars.add(customMerged("paulscode", null, new JarContentsBuilder().paths(paulsPaths).build()));
-    jars.add(customMerged("minecraft", mcModuleVersion, new JarContentsBuilder().paths(mcClassesPath, assetsJarPath).build()));
+    jars.add(customMerged("minecraft", mcModuleVersion, new JarContentsBuilder().paths(mcJarPath).build()));
     for(Path path : mcCP) jars.add(SecureJar.from(path));
     return List.of(new Resource(IModuleLayerManager.Layer.GAME, jars));
   }
