@@ -1,11 +1,12 @@
 pluginManagement {
   repositories {
     maven {
-      url 'https://heisluft.de/maven/'
+      url = 'https://heisluft.de/maven/'
     }
-    maven {
-      url 'https://maven.minecraftforge.net/'
-    }
+    gradlePluginPortal()
   }
+}
+plugins {
+  id('org.gradle.toolchains.foojay-resolver-convention') version '1.0.0'
 }
 rootProject.name = 'classiclauncherml'
