@@ -6,7 +6,7 @@ group 'de.heisluft'
 version '0.0.1'
 
 classicMC {
-  version = 'in-20100125-2'
+  version = 'in-20100128-2304'
   mappingType = 'fergie'
 }
 
